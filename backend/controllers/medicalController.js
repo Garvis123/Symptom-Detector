@@ -1,24 +1,17 @@
 const CheckupSession = require('../models/CheckupSession');
 const geminiService = require('../services/geminiService');
+const { analyzeSymptoms } = require('../services/geminiService');
+
 
 // Analyze symptoms using Gemini AI
 exports.analyzeSymptoms = async (req, res) => {
   try {
-    const { age, sex, symptoms } = req.body;
-
-    // Validate input
-    if (!age || !sex || !symptoms) {
-      return res.status(400).json({ message: 'Please provide age, sex, and symptoms' });
-    }
-
-    // Use Gemini AI to analyze symptoms
-    const analysisResult = await geminiService.analyzeSymptoms(age, sex, symptoms);
-
-    // Return the analysis results
-    res.status(200).json(analysisResult);
+    const { symptoms } = req.body;
+    const analysis = await geminiService.analyzeSymptoms(symptoms);
+    res.json({ conditions: analysis });
   } catch (error) {
     console.error('Error analyzing symptoms:', error);
-    res.status(500).json({ message: 'Failed to analyze symptoms', error: error.message });
+    res.status(500).json({ error: 'Failed to analyze symptoms' });
   }
 };
 

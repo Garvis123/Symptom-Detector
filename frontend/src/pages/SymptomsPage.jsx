@@ -9,59 +9,51 @@ const SymptomsPage = () => {
   const [symptoms, setSymptoms] = useState(userData.symptoms || '');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
-  
   const handleContinue = async () => {
     if (!symptoms.trim()) {
       setError('Please enter your symptoms');
       return false;
     }
-    
+  
     updateUserData({ symptoms });
     setIsProcessing(true);
-    
+    setError('');
+  
     try {
-      // In a real application, this would hit your backend API
-      // For now, we'll simulate an API response with mock data
-      const mockConditions = [
-        {
-          id: '1',
-          name: 'Common Cold',
-          probability: 'High',
-          description: 'A viral infection of the upper respiratory tract'
+      const response = await fetch('http://localhost:5000/api/gemini/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          id: '2',
-          name: 'Seasonal Allergies',
-          probability: 'Medium',
-          description: 'An immune response to environmental triggers'
-        },
-        {
-          id: '3',
-          name: 'Sinusitis',
-          probability: 'Low',
-          description: 'Inflammation of the sinuses'
-        }
-      ];
-      
-      // In production, you would call your API
-      // const response = await api.analyzeSymptoms({ 
-      //   age: userData.age, 
-      //   sex: userData.sex, 
-      //   symptoms 
-      // });
-      
-      setTimeout(() => {
-        updateUserData({ conditions: mockConditions });
+        body: JSON.stringify({
+          age: userData.age,
+          sex: userData.sex,
+          symptoms,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to analyze symptoms');
+      }
+  
+      const data = await response.json();
+  
+      if (data.conditions) {
+        updateUserData({ conditions: data.conditions });
         setIsProcessing(false);
-      }, 2000);
-      
-      return true;
+        return true;
+      } else {
+        throw new Error('Invalid data format');
+      }
     } catch (err) {
+      console.error('Error:', err);
       setError('Failed to analyze symptoms. Please try again.');
       setIsProcessing(false);
       return false;
     }
   };
+  
+  
   
   return (
     <div className="symptoms-page">

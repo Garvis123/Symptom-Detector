@@ -17,38 +17,38 @@ const DetailsPage = () => {
   }, [userData.details, userData.selectedCondition, navigate]);
 
   const handleContinue = async () => {
-    // Mock treatment data
-    const mockTreatments = {
-      medications: [
-        {
-          name: "Over-the-counter pain relievers",
-          description: "Such as acetaminophen or ibuprofen to reduce fever and pain",
+    try {
+      const response = await fetch(`http://localhost:5000/api/condition-details/${encodeURIComponent(userData.selectedCondition.name)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          name: "Decongestants",
-          description: "To help clear nasal passages",
-        },
-      ],
-      homeCare: [
-        "Rest to help the body fight the infection",
-        "Stay hydrated by drinking plenty of fluids",
-        "Use a humidifier or take a hot shower to ease congestion",
-      ],
-      lifestyle: [
-        "Adequate sleep to boost immune function",
-        "Balanced diet rich in fruits and vegetables",
-        "Stress management techniques",
-      ],
-      whenToSeeDoctor: [
-        "Fever above 101.3°F (38.5°C) that lasts more than 3 days",
-        "Symptoms that worsen after 7 days",
-        "Severe headache or sinus pain",
-      ],
-    };
-
-    updateUserData({ treatments: mockTreatments });
-    return true;
+        body: JSON.stringify({
+          conditionName: userData.selectedCondition.name
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch treatment suggestions');
+      }
+  
+      const data = await response.json();
+  
+      if (data.treatments) {
+        updateUserData({ treatments: data.treatments });
+      } else {
+        throw new Error('No treatment data received');
+      }
+  
+      return true;
+    } catch (error) {
+      console.error('Treatment fetch error:', error);
+      alert('Failed to load treatment suggestions. Please try again.');
+      return false;
+    }
   };
+  
+  
 
   if (!userData.details || !userData.selectedCondition) {
     return <div className="loading">Loading details...</div>;

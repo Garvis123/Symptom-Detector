@@ -9,28 +9,57 @@ const ConditionsPage = () => {
   const [selectedCondition, setSelectedCondition] = React.useState(
     userData.selectedCondition || null
   );
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
   
   const handleConditionSelect = (condition) => {
     setSelectedCondition(condition);
     updateUserData({ selectedCondition: condition });
+    // Clear any previous errors
+    setError(null);
   };
   
   const handleContinue = async () => {
-    // In a real app, you would fetch details about the selected condition
-    // For now, we'll simulate with mock data
-    const mockDetails = {
-      overview: "This condition is caused by a virus and typically affects the upper respiratory system.",
-      causes: "Viral infection that spreads through respiratory droplets.",
-      riskFactors: ["Weakened immune system", "Close contact with infected individuals", "Winter season"],
-      complications: ["Sinus infection", "Ear infection", "Bronchitis"],
-      prevention: ["Frequent handwashing", "Avoiding close contact with sick people", "Getting adequate rest"]
-    };
+    if (!selectedCondition) return false;
     
-    // In production, call your API:
-    // const details = await api.getConditionDetails(selectedCondition.id);
-    
-    updateUserData({ details: mockDetails });
-    return true;
+    setIsLoading(true);
+    setError(null);
+  
+    try {
+      // Make sure to properly encode the condition name for the URL
+      const conditionName = encodeURIComponent(selectedCondition.name);
+      console.log(`Fetching details for: ${conditionName}`);
+      
+      const response = await fetch(`http://localhost:5000/api/condition-details/${conditionName}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch condition details');
+      }
+  
+      const data = await response.json();
+      console.log('Received condition details:', data);
+  
+      if (data.details) {
+        // Store the details in context
+        updateUserData({ details: data.details });
+        setIsLoading(false);
+        return true;
+      } else {
+        throw new Error('No details received from the server');
+      }
+  
+    } catch (err) {
+      console.error('Error fetching condition details:', err);
+      setError(err.message || 'Error fetching condition details');
+      setIsLoading(false);
+      return false;
+    }
   };
   
   return (
@@ -49,14 +78,21 @@ const ConditionsPage = () => {
         <p className="symptom-text">{userData.symptoms}</p>
       </div>
       
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+      
       <div className="conditions-list">
         <h2>Possible Conditions</h2>
         <p className="instruction">Select a condition to learn more details</p>
         
         {userData.conditions && userData.conditions.map((condition) => (
           <div 
-            key={condition.id}
-            className={`condition-card ${selectedCondition?.id === condition.id ? 'selected' : ''}`}
+            key={condition.id || condition.name}
+            className={`condition-card ${selectedCondition?.id === condition.id || 
+              selectedCondition?.name === condition.name ? 'selected' : ''}`}
             onClick={() => handleConditionSelect(condition)}
           >
             <div className="condition-header">
@@ -74,8 +110,9 @@ const ConditionsPage = () => {
         <PreviousButton />
         <ContinueButton 
           onClick={handleContinue} 
-          disabled={!selectedCondition} 
+          disabled={!selectedCondition || isLoading} 
         />
+        {isLoading && <span className="loading-indicator">Loading...</span>}
       </div>
     </div>
   );

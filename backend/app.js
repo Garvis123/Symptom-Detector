@@ -22,6 +22,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/symptom-c
 // Routes
 app.use('/api', medicalRoutes);
 
+
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
