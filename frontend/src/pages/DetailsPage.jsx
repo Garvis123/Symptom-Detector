@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useChecker } from '../context/CheckerContext';
 import { useNavigate } from 'react-router-dom';
 import PreviousButton from '../components/PreviousButton';
@@ -8,6 +8,8 @@ import './detailpage.css';
 const DetailsPage = () => {
   const { userData, updateUserData } = useChecker();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Redirect to conditions page if details are missing
@@ -17,38 +19,45 @@ const DetailsPage = () => {
   }, [userData.details, userData.selectedCondition, navigate]);
 
   const handleContinue = async () => {
+    if (!userData.selectedCondition) return false;
+    
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const response = await fetch(`http://localhost:5000/api/condition-details/${encodeURIComponent(userData.selectedCondition.name)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          conditionName: userData.selectedCondition.name
-        }),
-      });
-  
+      // Use the treatments endpoint with a GET request instead
+      const response = await fetch(
+        `http://localhost:5000/api/treatments/${encodeURIComponent(userData.selectedCondition.name)}`, 
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to fetch treatment suggestions');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch treatment suggestions');
       }
-  
+
       const data = await response.json();
-  
+      console.log('Treatment data received:', data);
+
       if (data.treatments) {
         updateUserData({ treatments: data.treatments });
+        setIsLoading(false);
+        return true;
       } else {
         throw new Error('No treatment data received');
       }
-  
-      return true;
     } catch (error) {
       console.error('Treatment fetch error:', error);
-      alert('Failed to load treatment suggestions. Please try again.');
+      setError(error.message || 'Failed to load treatment suggestions');
+      setIsLoading(false);
       return false;
     }
   };
-  
-  
 
   if (!userData.details || !userData.selectedCondition) {
     return <div className="loading">Loading details...</div>;
@@ -71,6 +80,12 @@ const DetailsPage = () => {
           {userData.selectedCondition.probability} Probability
         </span>
       </div>
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
 
       <div className="details-section">
         <div className="detail-card">
@@ -113,7 +128,11 @@ const DetailsPage = () => {
 
       <div className="buttons-container">
         <PreviousButton />
-        <ContinueButton onClick={handleContinue} />
+        <ContinueButton 
+          onClick={handleContinue} 
+          disabled={isLoading}
+        />
+        {isLoading && <span className="loading-indicator">Loading treatments...</span>}
       </div>
     </div>
   );

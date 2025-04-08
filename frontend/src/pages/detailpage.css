@@ -102,3 +102,26 @@
     font-size: 18px;
     color: #2196f3;
   }
+  .error-message {
+    background-color: #ffeded;
+    border-left: 4px solid #f44336;
+    padding: 12px;
+    margin: 16px 0;
+    color: #d32f2f;
+    border-radius: 4px;
+  }
+  
+  .loading-indicator {
+    margin-left: 16px;
+    color: #666;
+    font-style: italic;
+  }
+  
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    font-size: 18px;
+    color: #666;
+  }
