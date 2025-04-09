@@ -1,33 +1,58 @@
 .continue-button {
-    background-color: #2196f3;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px auto;
-  }
-  
-  .continue-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-  
-  .continue-button .arrow {
-    margin-left: 10px;
-  }
-  
-  .previous-button {
-    background-color: transparent;
-    color: #2196f3;
-    border: 1px solid #2196f3;
-    padding: 12px 30px;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
+  background: linear-gradient(135deg, #2196f3, #21cbf3);
+  color: white;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 24px auto;
+  box-shadow: 0 8px 20px rgba(33, 150, 243, 0.2);
+  transition: all 0.3s ease;
+}
+
+.continue-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(33, 150, 243, 0.3);
+}
+
+.continue-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.continue-button .arrow {
+  margin-left: 12px;
+  transition: transform 0.3s ease;
+}
+
+.continue-button:hover .arrow {
+  transform: translateX(5px);
+}
+
+/* Previous Button Styles */
+.previous-button {
+  background-color: #fff;
+  color: #2196f3;
+  border: 2px solid #2196f3;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
+}
+
+.previous-button:hover {
+  background-color: #2196f3;
+  color: white;
+  box-shadow: 0 8px 18px rgba(33, 150, 243, 0.2);
+  transform: translateY(-2px);
+}
